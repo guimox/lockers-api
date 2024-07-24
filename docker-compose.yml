@@ -1,0 +1,16 @@
+version: '3'
+services:
+  lockers-db-container:
+    image: postgres:latest
+    container_name: lockers-db-container
+    environment:
+      POSTGRES_USER: admin-lockers
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: lockers-db
+    ports:
+      - "5434:5432"
+    volumes:
+      - lockers-volume:/var/lib/postgresql/data
+
+volumes:
+  lockers-volume:
