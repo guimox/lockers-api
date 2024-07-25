@@ -2,6 +2,7 @@ package com.lockers.api.service;
 
 import com.lockers.api.models.StudentModel;
 import com.lockers.api.repository.StudentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,8 +11,9 @@ import java.util.Optional;
 @Service
 public class StudentService {
 
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
+    @Autowired
     public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
     }
@@ -33,11 +35,6 @@ public class StudentService {
     }
 
     public void deleteById(String grr) {
-        Optional<StudentModel> studentOptional = studentRepository.findById(grr);
-        if (studentOptional.isPresent()) {
-            StudentModel student = studentOptional.get();
-            student.setDeleted(true);
-            studentRepository.save(student);
-        }
+        studentRepository.deleteById(grr);
     }
 }

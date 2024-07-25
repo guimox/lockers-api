@@ -1,8 +1,7 @@
 package com.lockers.api.controller;
 
-
-import com.lockers.api.models.LockerModel;
-import com.lockers.api.models.StudentModel;
+import com.lockers.api.dto.LockerDTO;
+import com.lockers.api.dto.StudentDTO;
 import com.lockers.api.misc.LockerId;
 import com.lockers.api.service.LockerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,45 +9,47 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/lockers")
 public class LockerController {
 
-    private LockerService lockerService;
+    private final LockerService lockerService;
 
+    @Autowired
     public LockerController(LockerService lockerService) {
         this.lockerService = lockerService;
     }
 
     @GetMapping
-    public List<LockerModel> getAllLockers() {
-        return lockerService.getAllLockers();
+    public List<LockerDTO> getAllLockers() {
+        return lockerService.getAllLockers().stream()
+                .map(LockerDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{number}/{sector}")
-    public ResponseEntity<LockerModel> getLockerById(@PathVariable int number, @PathVariable String sector) {
+    public ResponseEntity<LockerDTO> getLockerById(@PathVariable int number, @PathVariable String sector) {
         LockerId id = new LockerId(number, sector);
         return lockerService.getLockerById(id)
-                .map(ResponseEntity::ok)
+                .map(locker -> ResponseEntity.ok(LockerDTO.fromEntity(locker)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public LockerModel createLocker(@RequestBody LockerModel locker) {
-        return lockerService.createLocker(locker);
+    public LockerDTO createLocker(@RequestBody LockerDTO lockerDTO) {
+        return LockerDTO.fromEntity(lockerService.createLocker(LockerDTO.toEntity(lockerDTO)));
     }
 
     @PutMapping("/{number}/{sector}")
-    public ResponseEntity<LockerModel> updateLocker(@PathVariable int number, @PathVariable String sector, @RequestBody LockerModel lockerDetails) {
+    public ResponseEntity<LockerDTO> updateLocker(@PathVariable int number, @PathVariable String sector, @RequestBody LockerDTO lockerDetailsDTO) {
         LockerId id = new LockerId(number, sector);
         return lockerService.getLockerById(id)
                 .map(locker -> {
-                    locker.setStudent(lockerDetails.getStudent());
-                    locker.setSector(lockerDetails.getSector());
-                    locker.setNumber(lockerDetails.getNumber());
-                    locker.setUpdatedAt(lockerDetails.getUpdatedAt());
-                    return ResponseEntity.ok(lockerService.updateLocker(locker));
+                    locker.setStudent(StudentDTO.toEntity(lockerDetailsDTO.getStudent()));
+                    locker.setUpdatedAt(lockerDetailsDTO.getUpdatedAt());
+                    return ResponseEntity.ok(LockerDTO.fromEntity(lockerService.updateLocker(locker)));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -65,14 +66,14 @@ public class LockerController {
     }
 
     @PostMapping("/{number}/{sector}/assign-student")
-    public ResponseEntity<LockerModel> assignStudentToLocker(@PathVariable int number, @PathVariable String sector, @RequestBody StudentModel student) {
+    public ResponseEntity<LockerDTO> assignStudentToLocker(@PathVariable int number, @PathVariable String sector, @RequestBody StudentDTO studentDTO) {
         LockerId id = new LockerId(number, sector);
-        return ResponseEntity.ok(lockerService.assignStudentToLocker(id, student));
+        return ResponseEntity.ok(LockerDTO.fromEntity(lockerService.assignStudentToLocker(id, StudentDTO.toEntity(studentDTO))));
     }
 
     @PostMapping("/{number}/{sector}/remove-student")
-    public ResponseEntity<LockerModel> removeStudentFromLocker(@PathVariable int number, @PathVariable String sector) {
+    public ResponseEntity<LockerDTO> removeStudentFromLocker(@PathVariable int number, @PathVariable String sector) {
         LockerId id = new LockerId(number, sector);
-        return ResponseEntity.ok(lockerService.removeStudentFromLocker(id));
+        return ResponseEntity.ok(LockerDTO.fromEntity(lockerService.removeStudentFromLocker(id)));
     }
 }

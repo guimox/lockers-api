@@ -1,6 +1,5 @@
 package com.lockers.api.service;
 
-
 import com.lockers.api.models.LockerModel;
 import com.lockers.api.misc.LockerId;
 import com.lockers.api.models.StudentModel;
@@ -16,6 +15,7 @@ public class LockerService {
 
     private LockerRepository lockerRepository;
 
+    @Autowired
     public LockerService(LockerRepository lockerRepository) {
         this.lockerRepository = lockerRepository;
     }
