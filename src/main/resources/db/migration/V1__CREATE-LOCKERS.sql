@@ -2,10 +2,9 @@ CREATE TABLE IF NOT EXISTS lockers (
     number INT NOT NULL,
     sector VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     student_grr VARCHAR(8),
-    PRIMARY KEY (number, sector),
-    CONSTRAINT FK_student FOREIGN KEY (student_grr) REFERENCES students(grr)
+    PRIMARY KEY (number, sector)
 );
 
 INSERT INTO lockers (number, sector)
