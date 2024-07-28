@@ -1,0 +1,22 @@
+meta {
+  name: create-student
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/api/students
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "grr": "20100829",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "password": "securepassword123"
+  }
+  
+}
