@@ -1,10 +1,7 @@
 package com.lockers.api.dto;
 
-import com.lockers.api.models.StudentModel;
-
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class StudentDTO {
 
@@ -12,6 +9,7 @@ public class StudentDTO {
     private String firstName;
     private String lastName;
     private String email;
+    private String password;
     private Instant createdAt;
     private Instant updatedAt;
     private boolean isDeleted;
@@ -49,6 +47,14 @@ public class StudentDTO {
         this.email = email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -79,32 +85,5 @@ public class StudentDTO {
 
     public void setLockers(List<LockerDTO> lockers) {
         this.lockers = lockers;
-    }
-
-    public static StudentDTO fromEntity(StudentModel student) {
-        StudentDTO dto = new StudentDTO();
-        dto.setGrr(student.getGrr());
-        dto.setFirstName(student.getFirstName());
-        dto.setLastName(student.getLastName());
-        dto.setEmail(student.getEmail());
-        dto.setCreatedAt(student.getCreatedAt());
-        dto.setUpdatedAt(student.getUpdatedAt());
-        dto.setDeleted(student.isDeleted());
-        if (student.getLockers() != null) {
-            dto.setLockers(student.getLockers().stream()
-                    .map(LockerDTO::fromEntity)
-                    .collect(Collectors.toList()));
-        }
-        return dto;
-    }
-
-    public static StudentModel toEntity(StudentDTO dto) {
-        StudentModel student = new StudentModel();
-        student.setGrr(dto.getGrr());
-        student.setFirstName(dto.getFirstName());
-        student.setLastName(dto.getLastName());
-        student.setEmail(dto.getEmail());
-        student.setDeleted(dto.isDeleted());
-        return student;
     }
 }

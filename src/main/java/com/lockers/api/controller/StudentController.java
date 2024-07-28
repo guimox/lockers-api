@@ -1,9 +1,9 @@
 package com.lockers.api.controller;
 
 import com.lockers.api.dto.StudentDTO;
-import com.lockers.api.service.StudentService;
+import com.lockers.api.mapper.StudentMapper;
 import com.lockers.api.models.StudentModel;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.lockers.api.service.StudentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,42 +15,44 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/students")
 public class StudentController {
 
-    private StudentService studentService;
+    private final StudentService studentService;
+    private final StudentMapper studentMapper;
 
-    @Autowired
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, StudentMapper studentMapper) {
         this.studentService = studentService;
+        this.studentMapper = studentMapper;
     }
 
     @GetMapping
     public List<StudentDTO> getAllStudents() {
         return studentService.findAll().stream()
-                .map(StudentDTO::fromEntity)
+                .map(studentMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/{grr}")
     public ResponseEntity<StudentDTO> getStudentById(@PathVariable String grr) {
-        Optional<StudentModel> studentOptional = studentService.findById(grr);
-        return studentOptional
-                .map(student -> ResponseEntity.ok(StudentDTO.fromEntity(student)))
-                .orElse(ResponseEntity.notFound().build());
+        Optional<StudentDTO> studentOptional = studentService.findById(grr).map(studentMapper::toDto);
+        if (studentOptional.isPresent()) {
+            return ResponseEntity.ok(studentOptional.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<StudentDTO> createStudent(@RequestBody StudentDTO studentDTO) {
-        StudentModel createdStudent = studentService.save(StudentDTO.toEntity(studentDTO));
-        return ResponseEntity.ok(StudentDTO.fromEntity(createdStudent));
+    public ResponseEntity<StudentModel> createStudent(@RequestBody StudentDTO student) {
+        StudentModel studentModel = studentService.createStudent(student);
+        return ResponseEntity.ok(studentModel);
     }
 
     @PutMapping("/{grr}")
-    public ResponseEntity<StudentDTO> updateStudent(@PathVariable String grr, @RequestBody StudentDTO studentDTO) {
-        Optional<StudentModel> studentOptional = studentService.findById(grr);
+    public ResponseEntity<StudentDTO> updateStudent(@PathVariable String grr, @RequestBody StudentDTO student) {
+        Optional<StudentDTO> studentOptional = studentService.findById(grr).map(studentMapper::toDto);
         if (studentOptional.isPresent()) {
-            StudentModel studentModel = StudentDTO.toEntity(studentDTO);
-            studentModel.setGrr(grr);
-            StudentModel updatedStudent = studentService.update(studentModel);
-            return ResponseEntity.ok(StudentDTO.fromEntity(updatedStudent));
+            student.setGrr(grr);
+            StudentDTO updatedStudent = studentMapper.toDto(studentService.update(studentMapper.toEntity(student)));
+            return ResponseEntity.ok(updatedStudent);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -58,7 +60,7 @@ public class StudentController {
 
     @DeleteMapping("/{grr}")
     public ResponseEntity<Void> deleteStudent(@PathVariable String grr) {
-        Optional<StudentModel> studentOptional = studentService.findById(grr);
+        Optional<StudentDTO> studentOptional = studentService.findById(grr).map(studentMapper::toDto);
         if (studentOptional.isPresent()) {
             studentService.deleteById(grr);
             return ResponseEntity.ok().build();

@@ -1,8 +1,9 @@
 package com.lockers.api.service;
 
+import com.lockers.api.dto.StudentDTO;
 import com.lockers.api.models.StudentModel;
 import com.lockers.api.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,11 +13,13 @@ import java.util.Optional;
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public StudentService(StudentRepository studentRepository) {
+    public StudentService(StudentRepository studentRepository, PasswordEncoder passwordEncoder) {
         this.studentRepository = studentRepository;
+        this.passwordEncoder = passwordEncoder;
     }
+
 
     public List<StudentModel> findAll() {
         return studentRepository.findAll();
@@ -26,7 +29,15 @@ public class StudentService {
         return studentRepository.findById(grr);
     }
 
-    public StudentModel save(StudentModel student) {
+    public StudentModel createStudent(StudentDTO studentDTO) {
+        StudentModel student = new StudentModel();
+        student.setGrr(studentDTO.getGrr());
+        student.setFirstName(studentDTO.getFirstName());
+        student.setLastName(studentDTO.getLastName());
+        student.setEmail(studentDTO.getEmail());
+        student.setPassword(passwordEncoder.encode(studentDTO.getPassword()));
+        student.setDeleted(studentDTO.isDeleted());
+
         return studentRepository.save(student);
     }
 

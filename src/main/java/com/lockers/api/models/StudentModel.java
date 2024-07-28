@@ -12,6 +12,7 @@ import java.util.List;
 public class StudentModel {
 
     @Id
+    @Column(length = 8)
     private String grr;
 
     private String firstName;
@@ -19,6 +20,8 @@ public class StudentModel {
     private String lastName;
 
     private String email;
+
+    private String password;
 
     @CreationTimestamp
     private Instant createdAt;
@@ -61,6 +64,14 @@ public class StudentModel {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Instant getCreatedAt() {
